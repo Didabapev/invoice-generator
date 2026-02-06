@@ -117,105 +117,23 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-function addItem() {
-  const row = document.createElement('tr');
-  row.innerHTML = `<td><input /></td><td><input type="number" value="1" /></td><td><input type="number" value="0" /></td><td class="line-total">0.00</td>`;
-  document.querySelector('#items tbody').appendChild(row);
-}
-
-function calculateSubtotal() {
-  let subtotal = 0;
-  document.querySelectorAll('#items tbody tr').forEach(row => {
-    const qty = Number(row.children[1].querySelector('input').value);
-    const price = Number(row.children[2].querySelector('input').value);
-    const total = qty * price;
-    row.querySelector('.line-total').innerText = total.toFixed(2);
-    subtotal += total;
-  });
-  return subtotal;
-}
-
-function generateInvoice() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  const company = document.getElementById('billFrom').value;
-  const client = document.getElementById('clientName').value;
-  const invoiceNumber = document.getElementById('invoiceNumber').value;
-  const invoiceDate = document.getElementById('invoiceDate').value;
-  const dueDate = document.getElementById('dueDate').value;
-  const taxRate = Number(document.getElementById('tax').value) || 0;
-
-  const subtotal = calculateSubtotal();
-  const tax = subtotal * taxRate / 100;
-  const total = subtotal + tax;
-
-  doc.setFontSize(22);
-  doc.text(company || 'Invoice', 20, 20);
-
-  doc.setFontSize(11);
-  doc.text(`Invoice #: ${invoiceNumber}`, 150, 20);
-  doc.text(`Date: ${invoiceDate}`, 150, 28);
-  doc.text(`Due: ${dueDate}`, 150, 36);
-
-  doc.text('Bill To:', 20, 45);
-  doc.text(client, 20, 52);
-
-  let y = 70;
-  doc.text('Description', 20, y);
-  doc.text('Qty', 110, y);
-  doc.text('Price', 130, y);
-  doc.text('Total', 160, y);
-
-  y += 6;
-  doc.line(20, y, 190, y);
-  y += 6;
-
-  document.querySelectorAll('#items tbody tr').forEach(row => {
-    const desc = row.children[0].querySelector('input').value;
-    const qty = row.children[1].querySelector('input').value;
-    const price = row.children[2].querySelector('input').value;
-    const line = row.querySelector('.line-total').innerText;
-
-    doc.text(desc, 20, y);
-    doc.text(qty, 112, y);
-    doc.text(`$${price}`, 130, y);
-    doc.text(`$${line}`, 160, y);
-    y += 8;
-  });
-
-  y += 6;
-  doc.line(20, y, 190, y);
-
-  y += 8;
-  doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 130, y);
-  y += 6;
-  doc.text(`Tax (${taxRate}%): $${tax.toFixed(2)}`, 130, y);
-  y += 6;
-
-  doc.setFontSize(14);
-  doc.text(`Total: $${total.toFixed(2)}`, 130, y + 4);
-
-  const isPro = localStorage.getItem('pro') === 'true';
-
-  if (!isPro) {
-    doc.setTextColor(180);
-    doc.setFontSize(40);
-    doc.text('FREE VERSION', 40, 200, { angle: 45 });
-  }
-
-  doc.save(`invoice-${invoiceNumber}.pdf`);
-}
-</script>
-<script>
-  <script>
   function activatePro() {
     localStorage.setItem('pro', 'true');
-    location.reload(); //
+    updateProUI();
   }
-</script>
 
+  function updateProUI() {
+    const btn = document.getElementById('proBtn');
+    if (!btn) return;
+    if (localStorage.getItem('pro') === 'true') {
+      btn.textContent = 'Pro active ✓';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      btn.style.cursor = 'default';
+    }
   }
+
+  window.addEventListener('load', updateProUI);
 </script>
 </body>
 </html>
