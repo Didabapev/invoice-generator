@@ -117,6 +117,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
+  // ===== PRO LOGIC =====
   function activatePro() {
     localStorage.setItem('pro', 'true');
     updateProUI();
@@ -125,7 +126,6 @@
   function updateProUI() {
     const btn = document.getElementById('proBtn');
     if (!btn) return;
-
     if (localStorage.getItem('pro') === 'true') {
       btn.textContent = 'Pro active ✓';
       btn.style.opacity = '0.7';
@@ -134,6 +134,28 @@
   }
 
   window.addEventListener('load', updateProUI);
+
+  // ===== PDF GENERATION =====
+  function generateInvoice() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text('Invoice', 20, 20);
+
+    doc.setFontSize(12);
+    doc.text('Thank you for your business.', 20, 40);
+
+    const isPro = localStorage.getItem('pro') === 'true';
+
+    if (!isPro) {
+      doc.setTextColor(180);
+      doc.setFontSize(40);
+      doc.text('FREE VERSION', 40, 200, { angle: 45 });
+    }
+
+    doc.save('invoice.pdf');
+  }
 </script>
 </body>
 </html>
