@@ -3,166 +3,111 @@
 <head>
   <meta charset="UTF-8" />
   <title>Invoice Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: #f5f5f5;
       padding: 40px;
     }
-    h1 { text-align: center; }
+
     .container {
-      background: #fff;
-      max-width: 800px;
+      max-width: 500px;
       margin: auto;
-      padding: 24px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
     }
-    input {
-      padding: 8px;
-      margin-bottom: 8px;
+
+    h1 {
+      text-align: center;
     }
-    .row { display: flex; gap: 10px; }
-    .row input { flex: 1; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background: #f0f0f0; }
-    button {
+
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
       margin-top: 10px;
-      padding: 12px;
-      background: #111;
-      color: #fff;
+      font-size: 16px;
+    }
+
+    button {
+      background: black;
+      color: white;
       border: none;
       cursor: pointer;
-      border-radius: 6px;
+      margin-top: 15px;
     }
-    .add-btn { background: #555; }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    .pro {
+      background: #0a7cff;
+    }
   </style>
 </head>
+
 <body>
-<!-- LANDING HEADER -->
-<section style="max-width:900px;margin:0 auto 30px auto;text-align:center;">
-  <h1 style="font-size:36px;margin-bottom:10px;">Invoice Generator</h1>
-  <p style="font-size:18px;color:#555;">Create professional invoices in seconds. Free. No signup.</p>
-  <a href="#app" style="display:inline-block;margin-top:20px;padding:14px 24px;background:#111;color:#fff;text-decoration:none;border-radius:8px;font-size:16px;">Create Invoice</a>
-</section>
+  <div class="container">
+    <h1>Invoice Generator</h1>
 
-<!-- PRICING -->
-<section style="max-width:900px;margin:0 auto 40px auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-  <div style="background:#fff;padding:24px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.06);">
-    <h2>Free</h2>
-    <p style="font-size:32px;">$0</p>
-    <ul>
-      <li>Create invoices</li>
-      <li>Multiple items</li>
-      <li>PDF export</li>
-      <li>Watermark</li>
-    </ul>
-    <p style="color:#777;">Perfect to try</p>
+    <input id="clientName" placeholder="Client Name" />
+    <textarea id="description" placeholder="Service description"></textarea>
+    <input id="total" placeholder="Total amount ($)" />
+
+    <button onclick="generateInvoice()">Generate Invoice (PDF)</button>
+    <button class="pro" onclick="activatePro()">Upgrade to Pro</button>
   </div>
 
-  <div style="background:#111;color:#fff;padding:24px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.12);">
-    <h2>Pro</h2>
-    <p style="font-size:32px;">$9 <span style="font-size:14px;">/ month</span></p>
-    <ul>
-      <li>No watermark</li>
-      <li>Custom branding</li>
-      <li>Professional invoices</li>
-      <li>Priority features</li>
-    </ul>
-    <button onclick="activatePro()" style="margin-top:10px;padding:12px 20px;border:none;border-radius:8px;font-size:15px;cursor:pointer;">Upgrade to Pro</button>
-  </div>
-</section>
+  <script>
+    function activatePro() {
+      localStorage.setItem('pro', 'true');
+      alert('Pro activated');
+    }
 
-<!-- APP -->
-<div id="app">
+    function generateInvoice() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
 
+      const client =
+        document.getElementById('clientName').value || 'Client Name';
+      const desc =
+        document.getElementById('description').value || 'Service description';
+      const total =
+        document.getElementById('total').value || '0';
 
-<div class="container">
-  <input id="invoiceNumber" placeholder="Invoice Number" />
+      doc.setFontSize(20);
+      doc.text('INVOICE', 20, 20);
 
-  <div class="row">
-    <input id="invoiceDate" type="date" />
-    <input id="dueDate" type="date" />
-  </div>
+      doc.setFontSize(12);
+      doc.text('Date: ' + new Date().toLocaleDateString(), 20, 35);
 
-  <input id="billFrom" placeholder="Your Company Name" />
-  <input id="clientName" placeholder="Client Name" />
+      doc.text('Bill To:', 20, 55);
+      doc.text(client, 20, 65);
 
-  <table id="items">
-    <thead>
-      <tr>
-        <th>Description</th>
-        <th>Qty</th>
-        <th>Unit Price</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><input /></td>
-        <td><input type="number" value="1" /></td>
-        <td><input type="number" value="0" /></td>
-        <td class="line-total">0.00</td>
-      </tr>
-    </tbody>
-  </table>
+      doc.text('Description:', 20, 85);
+      doc.text(desc, 20, 95);
 
-  <button class="add-btn" onclick="addItem()">Add Item</button>
+      doc.text('Total: $' + total, 20, 120);
 
-  <input id="tax" type="number" placeholder="Tax %" />
+      doc.text('Thank you for your business!', 20, 150);
 
-  <button onclick="generateInvoice()">Generate Invoice (PDF)</button>
-</div>
+      if (localStorage.getItem('pro') !== 'true') {
+        doc.setTextColor(180);
+        doc.setFontSize(40);
+        doc.text('FREE VERSION', 35, 200, { angle: 45 });
+        doc.setTextColor(0);
+      }
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-  // ===== PRO LOGIC =====
- <script>
-function activatePro() {
-  localStorage.setItem('pro', 'true');
-  alert('Pro activated');
-}
-
-function generateInvoice() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.setFontSize(20);
-  doc.text('INVOICE', 20, 20);
-
-  doc.setFontSize(12);
-  doc.text('Invoice Number: 001', 20, 40);
-  doc.text('Date: ' + new Date().toLocaleDateString(), 20, 50);
-
-  doc.text('Bill To:', 20, 70);
-  doc.text(
-    document.getElementById('clientName')?.value || 'Client Name',
-    20,
-    80
-  );
-
-  doc.text('Description:', 20, 110);
-  doc.text(
-    document.getElementById('description')?.value || 'Service description',
-    20,
-    120
-  );
-
-  doc.text(
-    'Total: $' +
-      (document.getElementById('total')?.value || '0'),
-    20,
-    150
-  );
-
-  if (localStorage.getItem('pro') !== 'true') {
-    doc.setTextColor(180);
-    doc.setFontSize(40);
-    doc.text('FREE VERSION', 40, 200, { angle: 45 });
-  }
-
-  doc.save('invoice.pdf');
-}
-</script>
+      doc.save('invoice.pdf');
+    }
+  </script>
+</body>
+</html>
 
