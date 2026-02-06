@@ -70,7 +70,7 @@
       <li>Professional invoices</li>
       <li>Priority features</li>
     </ul>
-    <button onclick="alert('Payments coming soon 🚀')" style="margin-top:10px;padding:12px 20px;border:none;border-radius:8px;font-size:15px;cursor:pointer;">Upgrade to Pro</button>
+    <button onclick="activatePro()" style="margin-top:10px;padding:12px 20px;border:none;border-radius:8px;font-size:15px;cursor:pointer;">Upgrade to Pro</button>
   </div>
 </section>
 
@@ -196,9 +196,13 @@ function generateInvoice() {
   doc.setFontSize(14);
   doc.text(`Total: $${total.toFixed(2)}`, 130, y + 4);
 
-  doc.setTextColor(180);
-  doc.setFontSize(40);
-  doc.text('PRO VERSION', 40, 200, { angle: 45 });
+  const isPro = localStorage.getItem('pro') === 'true';
+
+  if (!isPro) {
+    doc.setTextColor(180);
+    doc.setFontSize(40);
+    doc.text('FREE VERSION', 40, 200, { angle: 45 });
+  }
 
   doc.save(`invoice-${invoiceNumber}.pdf`);
 }
