@@ -123,17 +123,14 @@
   }
 
   function updateProUI() {
-  const btn = document.getElementById('proBtn');
-  if (!btn) return;
-  if (localStorage.getItem('pro') === 'true') {
-    btn.textContent = 'Pro active ✓';
-    btn.style.opacity = '0.7';
-    btn.style.cursor = 'default';
-  }
-}
+    const btn = document.getElementById('proBtn');
+    if (!btn) return;
 
-// ВАЖНО: не трогаем кнопки генерации PDF
-// и не блокируем события формы
+    if (localStorage.getItem('pro') === 'true') {
+      btn.textContent = 'Pro active ✓';
+      btn.style.opacity = '0.7';
+      btn.style.cursor = 'default';
+    }
   }
 
   window.addEventListener('load', updateProUI);
