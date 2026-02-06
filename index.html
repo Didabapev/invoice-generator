@@ -12,10 +12,11 @@
     h1 { text-align: center; }
     .container {
       background: #fff;
-      max-width: 700px;
+      max-width: 800px;
       margin: auto;
-      padding: 20px;
-      border-radius: 8px;
+      padding: 24px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     }
     input {
       padding: 8px;
@@ -24,17 +25,18 @@
     .row { display: flex; gap: 10px; }
     .row input { flex: 1; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
     th { background: #f0f0f0; }
     button {
       margin-top: 10px;
-      padding: 10px;
-      background: #000;
+      padding: 12px;
+      background: #111;
       color: #fff;
       border: none;
       cursor: pointer;
+      border-radius: 6px;
     }
-    .add-btn { background: #444; }
+    .add-btn { background: #555; }
   </style>
 </head>
 <body>
@@ -48,8 +50,8 @@
     <input id="dueDate" type="date" />
   </div>
 
-  <input id="billFrom" placeholder="Bill From (Your Company)" />
-  <input id="clientName" placeholder="Bill To (Client Name)" />
+  <input id="billFrom" placeholder="Your Company Name" />
+  <input id="clientName" placeholder="Client Name" />
 
   <table id="items">
     <thead>
@@ -65,14 +67,14 @@
         <td><input /></td>
         <td><input type="number" value="1" /></td>
         <td><input type="number" value="0" /></td>
-        <td class="line-total">0</td>
+        <td class="line-total">0.00</td>
       </tr>
     </tbody>
   </table>
 
   <button class="add-btn" onclick="addItem()">Add Item</button>
 
-  <input id="tax" type="number" placeholder="Tax % (e.g. 10)" />
+  <input id="tax" type="number" placeholder="Tax %" />
 
   <button onclick="generateInvoice()">Generate Invoice (PDF)</button>
 </div>
@@ -80,17 +82,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 function addItem() {
-  const table = document.querySelector('#items tbody');
   const row = document.createElement('tr');
-  row.innerHTML = `
-    <td><input /></td>
-    <td><input type="number" value="1" /></td>
-    <td><input type="number" value="0" /></td>
-    <td class="line-total">0</td>`;
-  table.appendChild(row);
+  row.innerHTML = `<td><input /></td><td><input type="number" value="1" /></td><td><input type="number" value="0" /></td><td class="line-total">0.00</td>`;
+  document.querySelector('#items tbody').appendChild(row);
 }
 
-function calculateTotals() {
+function calculateSubtotal() {
   let subtotal = 0;
   document.querySelectorAll('#items tbody tr').forEach(row => {
     const qty = Number(row.children[1].querySelector('input').value);
@@ -106,49 +103,66 @@ function generateInvoice() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
+  const company = document.getElementById('billFrom').value;
+  const client = document.getElementById('clientName').value;
   const invoiceNumber = document.getElementById('invoiceNumber').value;
   const invoiceDate = document.getElementById('invoiceDate').value;
   const dueDate = document.getElementById('dueDate').value;
-  const billFrom = document.getElementById('billFrom').value;
-  const clientName = document.getElementById('clientName').value;
   const taxRate = Number(document.getElementById('tax').value) || 0;
 
-  const subtotal = calculateTotals();
-  const taxAmount = subtotal * taxRate / 100;
-  const total = subtotal + taxAmount;
+  const subtotal = calculateSubtotal();
+  const tax = subtotal * taxRate / 100;
+  const total = subtotal + tax;
 
-  doc.setFontSize(16);
-  doc.text('INVOICE', 20, 20);
+  doc.setFontSize(22);
+  doc.text(company || 'Invoice', 20, 20);
 
   doc.setFontSize(11);
-  doc.text(`Invoice #: ${invoiceNumber}`, 20, 35);
-  doc.text(`Invoice Date: ${invoiceDate}`, 20, 42);
-  doc.text(`Due Date: ${dueDate}`, 20, 49);
+  doc.text(`Invoice #: ${invoiceNumber}`, 150, 20);
+  doc.text(`Date: ${invoiceDate}`, 150, 28);
+  doc.text(`Due: ${dueDate}`, 150, 36);
 
-  doc.text('Bill From:', 20, 65);
-  doc.text(billFrom, 20, 72);
-  doc.text('Bill To:', 20, 85);
-  doc.text(clientName, 20, 92);
+  doc.text('Bill To:', 20, 45);
+  doc.text(client, 20, 52);
 
-  let y = 110;
-  doc.text('Items:', 20, y);
-  y += 8;
+  let y = 70;
+  doc.text('Description', 20, y);
+  doc.text('Qty', 110, y);
+  doc.text('Price', 130, y);
+  doc.text('Total', 160, y);
+
+  y += 6;
+  doc.line(20, y, 190, y);
+  y += 6;
 
   document.querySelectorAll('#items tbody tr').forEach(row => {
     const desc = row.children[0].querySelector('input').value;
     const qty = row.children[1].querySelector('input').value;
     const price = row.children[2].querySelector('input').value;
     const line = row.querySelector('.line-total').innerText;
-    doc.text(`${desc} | ${qty} x $${price} = $${line}`, 20, y);
-    y += 7;
+
+    doc.text(desc, 20, y);
+    doc.text(qty, 112, y);
+    doc.text(`$${price}`, 130, y);
+    doc.text(`$${line}`, 160, y);
+    y += 8;
   });
 
-  y += 10;
-  doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 20, y);
-  y += 7;
-  doc.text(`Tax (${taxRate}%): $${taxAmount.toFixed(2)}`, 20, y);
-  y += 7;
-  doc.text(`Total: $${total.toFixed(2)}`, 20, y);
+  y += 6;
+  doc.line(20, y, 190, y);
+
+  y += 8;
+  doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 130, y);
+  y += 6;
+  doc.text(`Tax (${taxRate}%): $${tax.toFixed(2)}`, 130, y);
+  y += 6;
+
+  doc.setFontSize(14);
+  doc.text(`Total: $${total.toFixed(2)}`, 130, y + 4);
+
+  doc.setTextColor(180);
+  doc.setFontSize(40);
+  doc.text('FREE VERSION', 40, 200, { angle: 45 });
 
   doc.save(`invoice-${invoiceNumber}.pdf`);
 }
