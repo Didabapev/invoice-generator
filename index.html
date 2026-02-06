@@ -207,5 +207,11 @@ function generateInvoice() {
   doc.save(`invoice-${invoiceNumber}.pdf`);
 }
 </script>
+<script>
+  function activatePro() {
+    localStorage.setItem('pro', 'true');
+    alert('🎉 Pro activated! Watermark removed.');
+  }
+</script>
 </body>
 </html>
