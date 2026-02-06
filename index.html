@@ -140,11 +140,36 @@
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    doc.setFontSize(18);
-    doc.text('Invoice', 20, 20);
+   function generateInvoice() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-    doc.setFontSize(12);
-    doc.text('Thank you for your business.', 20, 40);
+  doc.setFontSize(20);
+  doc.text('INVOICE', 20, 20);
+
+  doc.setFontSize(12);
+  doc.text('Invoice Number: 001', 20, 40);
+  doc.text('Date: ' + new Date().toLocaleDateString(), 20, 50);
+
+  doc.text('Bill To:', 20, 70);
+  doc.text('Client Name', 20, 80);
+
+  doc.text('Description', 20, 110);
+  doc.text('Service or product description', 20, 120);
+
+  doc.text('Total: $100', 20, 150);
+
+  doc.text('Thank you for your business!', 20, 180);
+
+  const isPro = localStorage.getItem('pro') === 'true';
+  if (!isPro) {
+    doc.setTextColor(180);
+    doc.setFontSize(40);
+    doc.text('FREE VERSION', 40, 200, { angle: 45 });
+  }
+
+  doc.save('invoice.pdf');
+}
 
     const isPro = localStorage.getItem('pro') === 'true';
 
