@@ -188,7 +188,8 @@ function addItem() {
   }
 
   items.push({ item, qty, price });
-  renderItems();
+  renderItems();saveState();
+
 
   document.getElementById('item').value = '';
   document.getElementById('qty').value = '';
@@ -216,7 +217,9 @@ function renderItems() {
 
 function removeItem(index) {
   items.splice(index, 1);
-  renderItems();
+  renderItems();saveState();
+
+
 }
 
 function activatePro() {
