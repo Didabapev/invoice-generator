@@ -1,121 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Invoice Generator</title>
+<meta charset="UTF-8">
+<title>Invoice Generator</title>
 
-  <!-- jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
-      margin: 0;
-      padding: 40px;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  padding: 40px;
+}
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-    }
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 14px;
+}
 
-    h1 {
-      margin-top: 0;
-    }
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
+button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #5b5cff;
+  color: #fff;
+  cursor: pointer;
+}
 
-    button {
-      padding: 10px 18px;
-      border: none;
-      border-radius: 10px;
-      background: #5b5cff;
-      color: #fff;
-      cursor: pointer;
-      margin-top: 10px;
-    }
+button.secondary {
+  background: #888;
+}
 
-    button.secondary {
-      background: #888;
-    }
+table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
 
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-    }
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
 
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-    }
+.total {
+  text-align: right;
+  font-size: 20px;
+  margin-top: 20px;
+}
 
-    .total {
-      text-align: right;
-      font-size: 20px;
-      margin-top: 20px;
-    }
+.actions {
+  margin-top: 30px;
+  display: flex;
+  gap: 10px;
+}
 
-    .actions {
-      margin-top: 30px;
-      display: flex;
-      gap: 10px;
-    }
-  </style>
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #333;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 10px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: 0.3s;
+  z-index: 9999;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
 </head>
 
 <body>
+
 <div class="container">
-  <h1>Invoice Generator</h1>
+<h1>Invoice Generator</h1>
 
-  <label>Client</label>
-  <input id="client" placeholder="Client name">
+<input id="client" placeholder="Client name">
+<textarea id="description" placeholder="Invoice description"></textarea>
 
-  <label>Description</label>
-  <textarea id="description" placeholder="Invoice description"></textarea>
+<h3>Add Item</h3>
+<input id="itemName" placeholder="Item name">
+<input id="itemQty" type="number" placeholder="Quantity">
+<input id="itemPrice" type="number" placeholder="Price">
+<button id="addItemBtn">Add item</button>
 
-  <h2>Add Item</h2>
-  <input id="itemName" placeholder="Item name">
-  <input id="itemQty" type="number" placeholder="Quantity">
-  <input id="itemPrice" type="number" placeholder="Price">
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Qty</th>
+<th>Price</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody id="itemsTable"></tbody>
+</table>
 
-  <button id="addItemBtn">Add item</button>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Item</th>
-        <th>Qty</th>
-        <th>Price</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody id="itemsTable"></tbody>
-  </table>
-
-  <div class="total">
-    Total: $<span id="total">0</span>
-  </div>
-
-  <div class="actions">
-    <button id="generateBtn">Generate Invoice (PDF)</button>
-    <button class="secondary" id="proBtn">Upgrade to Pro</button>
-  </div>
+<div class="total">
+Total: $<span id="total">0</span>
 </div>
+
+<div class="actions">
+<button id="generateBtn">Generate Invoice (PDF)</button>
+<button id="proBtn" class="secondary">Upgrade to Pro</button>
+</div>
+</div>
+
+<div id="toast" class="toast"></div>
 
 <script>
 let items = [];
 let isPro = localStorage.getItem('pro') === 'true';
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
 
 function saveState() {
   localStorage.setItem('items', JSON.stringify(items));
@@ -124,33 +142,28 @@ function saveState() {
 }
 
 function loadState() {
-  const saved = localStorage.getItem('items');
-  if (saved) items = JSON.parse(saved);
-
+  items = JSON.parse(localStorage.getItem('items') || '[]');
   client.value = localStorage.getItem('client') || '';
   description.value = localStorage.getItem('description') || '';
-
   renderItems();
 }
 
 function renderItems() {
   const tbody = document.getElementById('itemsTable');
   tbody.innerHTML = '';
-
   let total = 0;
 
-  items.forEach(item => {
+  items.forEach(i => {
     const row = document.createElement('tr');
-    const rowTotal = item.qty * item.price;
+    const rowTotal = i.qty * i.price;
     total += rowTotal;
 
     row.innerHTML = `
-      <td>${item.name}</td>
-      <td>${item.qty}</td>
-      <td>$${item.price}</td>
+      <td>${i.name}</td>
+      <td>${i.qty}</td>
+      <td>$${i.price}</td>
       <td>$${rowTotal}</td>
     `;
-
     tbody.appendChild(row);
   });
 
@@ -158,12 +171,17 @@ function renderItems() {
 }
 
 function addItem() {
+  if (!isPro && items.length >= 5) {
+    showToast('Free version limit: 5 items');
+    return;
+  }
+
   const name = itemName.value;
   const qty = Number(itemQty.value);
   const price = Number(itemPrice.value);
 
   if (!name || !qty || !price) {
-    alert('Fill all item fields');
+    showToast('Fill all item fields');
     return;
   }
 
@@ -174,6 +192,7 @@ function addItem() {
 
   saveState();
   renderItems();
+  showToast('Item added');
 }
 
 function generateInvoice() {
@@ -190,10 +209,9 @@ function generateInvoice() {
   let y = 60;
   let total = 0;
 
-  items.forEach(item => {
-    const line = `${item.name} — ${item.qty} x $${item.price}`;
-    doc.text(line, 20, y);
-    total += item.qty * item.price;
+  items.forEach(i => {
+    doc.text(`${i.name} - ${i.qty} x $${i.price}`, 20, y);
+    total += i.qty * i.price;
     y += 10;
   });
 
@@ -207,18 +225,16 @@ function generateInvoice() {
   }
 
   doc.save('invoice.pdf');
+  showToast('Invoice downloaded');
 }
 
 function activatePro() {
-  isPro = true;
-  localStorage.setItem('pro', 'true');
-  alert('Pro activated');
+  showToast('Redirecting to payment…');
 }
 
-document.getElementById('addItemBtn').addEventListener('click', addItem);
-document.getElementById('generateBtn').addEventListener('click', generateInvoice);
-document.getElementById('proBtn').addEventListener('click', activatePro);
-
+addItemBtn.onclick = addItem;
+generateBtn.onclick = generateInvoice;
+proBtn.onclick = activatePro;
 window.onload = loadState;
 </script>
 
