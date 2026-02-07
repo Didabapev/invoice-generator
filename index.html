@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Invoice Generator</title>
+
+<title>Free Invoice Generator – Create PDF Invoices Online</title>
+
+<meta name="description" content="Free online invoice generator. Create professional PDF invoices in seconds. No signup required. Perfect for freelancers and small businesses.">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -68,7 +73,6 @@ th, td {
   gap: 10px;
 }
 
-/* Toast */
 .toast {
   position: fixed;
   bottom: 30px;
@@ -91,12 +95,13 @@ th, td {
 <body>
 
 <div class="container">
-<h1>Invoice Generator</h1>
+<h1>Free Online Invoice Generator</h1>
+<p>Create professional PDF invoices instantly. No signup required.</p>
 
 <input id="client" placeholder="Client name">
 <textarea id="description" placeholder="Invoice description"></textarea>
 
-<h3>Add Item</h3>
+<h2>Add Invoice Items</h2>
 <input id="itemName" placeholder="Item name">
 <input id="itemQty" type="number" placeholder="Quantity">
 <input id="itemPrice" type="number" placeholder="Price">
@@ -123,6 +128,23 @@ Total: $<span id="total">0</span>
 <button id="generateBtn">Generate Invoice (PDF)</button>
 <button id="proBtn" class="secondary">Upgrade to Pro</button>
 </div>
+
+<hr style="margin:40px 0">
+
+<section>
+<h2>Free Invoice Generator for Freelancers & Small Businesses</h2>
+<p>
+Our free invoice generator allows you to create clean, professional PDF invoices online.
+Perfect for freelancers, contractors, and small business owners who need fast invoicing
+without registration or software installation.
+</p>
+
+<p>
+With this online invoice creator you can add multiple items, calculate totals automatically,
+and download invoices instantly. Upgrade to Pro to remove the watermark and unlock full features.
+</p>
+</section>
+
 </div>
 
 <div id="toast" class="toast"></div>
@@ -171,11 +193,6 @@ function editItem(index, field, value) {
 }
 
 function addItem() {
-  if (!isPro && items.length >= 5) {
-    toast('Free version limit: 5 items');
-    return;
-  }
-
   if (!itemName.value || !itemQty.value || !itemPrice.value) {
     toast('Fill all item fields');
     return;
@@ -242,7 +259,7 @@ function generatePDF() {
 }
 
 function activatePro() {
-  toast('Redirecting to payment…');
+  toast('Pro version coming soon');
 }
 
 addItemBtn.onclick = addItem;
