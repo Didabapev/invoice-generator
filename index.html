@@ -23,9 +23,8 @@ body {
 
 input, textarea {
   width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 8px;
+  padding: 8px;
+  border-radius: 6px;
   border: 1px solid #ccc;
 }
 
@@ -38,12 +37,12 @@ button {
   cursor: pointer;
 }
 
-button.secondary {
-  background: #888;
-}
-
 button.delete {
   background: #ff5b5b;
+}
+
+button.secondary {
+  background: #888;
 }
 
 table {
@@ -55,7 +54,6 @@ table {
 th, td {
   padding: 10px;
   border-bottom: 1px solid #eee;
-  text-align: left;
 }
 
 .total {
@@ -154,9 +152,9 @@ function render() {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${i.name}</td>
-      <td>${i.qty}</td>
-      <td>$${i.price}</td>
+      <td><input value="${i.name}" oninput="editItem(${index}, 'name', this.value)"></td>
+      <td><input type="number" value="${i.qty}" oninput="editItem(${index}, 'qty', this.value)"></td>
+      <td><input type="number" value="${i.price}" oninput="editItem(${index}, 'price', this.value)"></td>
       <td>$${rowTotal}</td>
       <td><button class="delete" onclick="removeItem(${index})">Delete</button></td>
     `;
@@ -164,6 +162,12 @@ function render() {
   });
 
   document.getElementById('total').textContent = total;
+}
+
+function editItem(index, field, value) {
+  items[index][field] = field === 'name' ? value : Number(value);
+  save();
+  render();
 }
 
 function addItem() {
