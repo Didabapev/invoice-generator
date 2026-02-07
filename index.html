@@ -1,225 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Invoice Generator</title>
+
+  <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #eef2ff, #f8fafc);
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
       margin: 0;
-      padding: 0;
+      padding: 40px;
     }
 
-    .app {
+    .container {
       max-width: 900px;
-      margin: 40px auto;
-      background: #ffffff;
+      margin: auto;
+      background: #fff;
       padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-    }
-
-    .logo {
-      font-size: 26px;
-      font-weight: 700;
-      color: #4f46e5;
-    }
-
-    .badge {
-      background: #eef2ff;
-      color: #3730a3;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
+      border-radius: 12px;
     }
 
     h1 {
-      text-align: center;
-      margin-bottom: 30px;
+      margin-top: 0;
     }
 
-    label {
-      font-weight: 600;
-      display: block;
-      margin-top: 15px;
-    }
-
-    input {
+    input, textarea {
       width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      border-radius: 10px;
-      border: 1px solid #d1d5db;
-      font-size: 14px;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
 
     button {
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
-      color: #fff;
+      padding: 10px 18px;
       border: none;
       border-radius: 10px;
-      padding: 12px 18px;
-      margin-top: 15px;
+      background: #5b5cff;
+      color: #fff;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 6px 15px rgba(79,70,229,0.3);
+      margin-top: 10px;
     }
 
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 25px rgba(79,70,229,0.35);
+    button.secondary {
+      background: #888;
     }
 
-    hr {
-      margin: 35px 0;
-      border: none;
-      border-top: 1px solid #e5e7eb;
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
     }
 
-    ul {
-      list-style: none;
-      padding: 0;
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
     }
 
-    li {
-      background: #ffffff;
-      padding: 12px 16px;
-      margin-bottom: 10px;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
-
-    li button {
-      background: #ef4444;
-      padding: 6px 10px;
-      font-size: 12px;
-      box-shadow: none;
-    }
-
-    li button:hover {
-      background: #dc2626;
-    }
-
-    p strong {
+    .total {
+      text-align: right;
       font-size: 20px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
       margin-top: 20px;
     }
 
-    .left, .right {
-      background: #f9fafb;
-      padding: 20px;
-      border-radius: 12px;
+    .actions {
+      margin-top: 30px;
+      display: flex;
+      gap: 10px;
     }
-</style>
+  </style>
 </head>
+
 <body>
-<header>
-  <div class="logo">InvoicePro</div>
-  <div class="badge">Online Invoice Generator</div>
-</header>
+<div class="container">
+  <h1>Invoice Generator</h1>
 
-<main class="app">
+  <label>Client</label>
+  <input id="client" placeholder="Client name">
 
+  <label>Description</label>
+  <textarea id="description" placeholder="Invoice description"></textarea>
 
-<h1>Invoice Generator</h1>
+  <h2>Add Item</h2>
+  <input id="itemName" placeholder="Item name">
+  <input id="itemQty" type="number" placeholder="Quantity">
+  <input id="itemPrice" type="number" placeholder="Price">
 
-<div class="grid">
-  <div class="left">
-    <label>Client Name</label>
-    <input id="client" placeholder="Client name" />
+  <button id="addItemBtn">Add item</button>
 
-    <label>Description</label>
-    <input id="description" placeholder="Service description" />
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="itemsTable"></tbody>
+  </table>
 
-    <hr />
-
-    <h3>Add Item</h3>
-    <input id="item" placeholder="Item name" />
-    <input id="qty" type="number" placeholder="Quantity" />
-    <input id="price" type="number" placeholder="Price" />
-    <button onclick="addItem()">Add item</button>
+  <div class="total">
+    Total: $<span id="total">0</span>
   </div>
 
-  <div class="right">
-    <h3>Items</h3>
-    <ul id="itemsList"></ul>
-    <p><strong>Total:</strong> $<span id="totalAmount">0</span></p>
+  <div class="actions">
+    <button id="generateBtn">Generate Invoice (PDF)</button>
+    <button class="secondary" id="proBtn">Upgrade to Pro</button>
   </div>
 </div>
 
-<hr />
-
-<button onclick="generateInvoice()">Generate Invoice (PDF)</button>
-<button onclick="activatePro()">Upgrade to Pro</button>
-
 <script>
 let items = [];
-let isPro = false;
+let isPro = localStorage.getItem('pro') === 'true';
+
+function saveState() {
+  localStorage.setItem('items', JSON.stringify(items));
+  localStorage.setItem('client', client.value);
+  localStorage.setItem('description', description.value);
+}
+
+function loadState() {
+  const saved = localStorage.getItem('items');
+  if (saved) items = JSON.parse(saved);
+
+  client.value = localStorage.getItem('client') || '';
+  description.value = localStorage.getItem('description') || '';
+
+  renderItems();
+}
+
+function renderItems() {
+  const tbody = document.getElementById('itemsTable');
+  tbody.innerHTML = '';
+
+  let total = 0;
+
+  items.forEach(item => {
+    const row = document.createElement('tr');
+    const rowTotal = item.qty * item.price;
+    total += rowTotal;
+
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.qty}</td>
+      <td>$${item.price}</td>
+      <td>$${rowTotal}</td>
+    `;
+
+    tbody.appendChild(row);
+  });
+
+  document.getElementById('total').textContent = total;
+}
 
 function addItem() {
-  const item = document.getElementById('item').value.trim();
-  const qty = parseFloat(document.getElementById('qty').value);
-  const price = parseFloat(document.getElementById('price').value);
+  const name = itemName.value;
+  const qty = Number(itemQty.value);
+  const price = Number(itemPrice.value);
 
-  if (!item || isNaN(qty) || isNaN(price)) {
+  if (!name || !qty || !price) {
     alert('Fill all item fields');
     return;
   }
 
-  items.push({ item, qty, price });
-  renderItems();saveState();
+  items.push({ name, qty, price });
+  itemName.value = '';
+  itemQty.value = '';
+  itemPrice.value = '';
 
-
-  document.getElementById('item').value = '';
-  document.getElementById('qty').value = '';
-  document.getElementById('price').value = '';
+  saveState();
+  renderItems();
 }
 
-function renderItems() {
-  const list = document.getElementById('itemsList');
-  const totalEl = document.getElementById('totalAmount');
+function generateInvoice() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-  list.innerHTML = '';
+  doc.setFontSize(18);
+  doc.text('INVOICE', 20, 20);
+
+  doc.setFontSize(12);
+  doc.text(`Client: ${client.value}`, 20, 35);
+  doc.text(`Description: ${description.value}`, 20, 45);
+
+  let y = 60;
   let total = 0;
 
-  items.forEach((it, index) => {
-    const itemTotal = it.qty * it.price;
-    total += itemTotal;
-
-    const li = document.createElement('li');
-    li.innerHTML = `${it.item} — ${it.qty} × $${it.price} = $${itemTotal} <button onclick="removeItem(${index})">❌</button>`;
-    list.appendChild(li);
+  items.forEach(item => {
+    const line = `${item.name} — ${item.qty} x $${item.price}`;
+    doc.text(line, 20, y);
+    total += item.qty * item.price;
+    y += 10;
   });
 
-  totalEl.textContent = total.toFixed(2);
-}
+  doc.text(`Total: $${total}`, 20, y + 10);
 
-function removeItem(index) {
-  items.splice(index, 1);
-  renderItems();saveState();
+  if (!isPro) {
+    doc.setTextColor(200);
+    doc.setFontSize(40);
+    doc.text('FREE VERSION', 30, 200, { angle: 45 });
+    doc.setTextColor(0);
+  }
 
-
+  doc.save('invoice.pdf');
 }
 
 function activatePro() {
@@ -228,117 +215,12 @@ function activatePro() {
   alert('Pro activated');
 }
 
-}
-
-function generateInvoice() {
-  if (items.length === 0) {
-    alert('Add at least one item');
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  // Header
-  doc.setFillColor(79, 70, 229);
-  doc.rect(0, 0, 210, 30, 'F');
-  doc.setTextColor(255);
-  doc.setFontSize(20);
-  doc.text('INVOICE', 20, 20);
-
-  doc.setFontSize(10);
-  doc.text('InvoicePro', 160, 18);
-
-  // Reset color
-  doc.setTextColor(0);
-
-  let y = 45;
-
-  // Client info
-  doc.setFontSize(12);
-  doc.text('Bill To:', 20, y);
-  y += 6;
-  doc.setFontSize(11);
-  doc.text(document.getElementById('client').value || 'Client name', 20, y);
-
-  y += 10;
-  doc.text('Description:', 20, y);
-  y += 6;
-  doc.text(document.getElementById('description').value || '-', 20, y);
-
-  // Table header
-  y += 15;
-  doc.setFontSize(11);
-  doc.setFillColor(243, 244, 246);
-  doc.rect(20, y - 6, 170, 8, 'F');
-  doc.text('Item', 22, y);
-  doc.text('Qty', 110, y);
-  doc.text('Price', 135, y);
-  doc.text('Total', 165, y);
-
-  y += 8;
-  let grandTotal = 0;
-
-  items.forEach(it => {
-    const rowTotal = it.qty * it.price;
-    grandTotal += rowTotal;
-
-    doc.text(it.item, 22, y);
-    doc.text(String(it.qty), 112, y);
-    doc.text(`$${it.price}`, 137, y);
-    doc.text(`$${rowTotal.toFixed(2)}`, 165, y);
-    y += 8;
-  });
-
-  // Grand total
-  y += 10;
-  doc.setFontSize(13);
-  doc.text(`Grand Total: $${grandTotal.toFixed(2)}`, 140, y);
-
-  // Footer
-  doc.setFontSize(10);
-  doc.text('Thank you for your business!', 20, 280);
-
-  // Watermark
-  if (!isPro) {
-    doc.setTextColor(200);
-    doc.setFontSize(45);
-    doc.text('FREE VERSION', 30, 200, { angle: 45 });
-    doc.setTextColor(0);
-  }
-
-  doc.save('invoice.pdf');
-}
-  function saveState() {
-  localStorage.setItem('invoice_items', JSON.stringify(items));
-  localStorage.setItem('invoice_client', document.getElementById('client').value);
-  localStorage.setItem('invoice_description', document.getElementById('description').value);
-}
-
-function loadState() {
-  const savedItems = localStorage.getItem('invoice_items');
-  if (savedItems) {
-    items = JSON.parse(savedItems);
-    renderItems();
-  }
-
-  const client = localStorage.getItem('invoice_client');
-  if (client) document.getElementById('client').value = client;
-
-  const description = localStorage.getItem('invoice_description');
-  if (description) document.getElementById('description').value = description;
-
-  if (localStorage.getItem('pro') === 'true') {
-    isPro = true;
-  }
-}
+document.getElementById('addItemBtn').addEventListener('click', addItem);
+document.getElementById('generateBtn').addEventListener('click', generateInvoice);
+document.getElementById('proBtn').addEventListener('click', activatePro);
 
 window.onload = loadState;
-
 </script>
 
-
-
-</main>
 </body>
 </html>
