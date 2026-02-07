@@ -77,7 +77,6 @@ th, td {
   opacity: 0;
   transform: translateY(20px);
   transition: 0.3s;
-  z-index: 9999;
 }
 .toast.show {
   opacity: 1;
@@ -128,43 +127,33 @@ Total: $<span id="total">0</span>
 let items = [];
 let isPro = localStorage.getItem('pro') === 'true';
 
-function showToast(msg) {
+function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-function saveState() {
+function save() {
   localStorage.setItem('items', JSON.stringify(items));
-  localStorage.setItem('client', client.value);
-  localStorage.setItem('description', description.value);
 }
 
-function loadState() {
-  items = JSON.parse(localStorage.getItem('items') || '[]');
-  client.value = localStorage.getItem('client') || '';
-  description.value = localStorage.getItem('description') || '';
-  renderItems();
-}
-
-function renderItems() {
-  const tbody = document.getElementById('itemsTable');
+function render() {
+  const tbody = itemsTable;
   tbody.innerHTML = '';
   let total = 0;
 
   items.forEach(i => {
-    const row = document.createElement('tr');
+    const tr = document.createElement('tr');
     const rowTotal = i.qty * i.price;
     total += rowTotal;
-
-    row.innerHTML = `
+    tr.innerHTML = `
       <td>${i.name}</td>
       <td>${i.qty}</td>
       <td>$${i.price}</td>
       <td>$${rowTotal}</td>
     `;
-    tbody.appendChild(row);
+    tbody.appendChild(tr);
   });
 
   document.getElementById('total').textContent = total;
@@ -172,70 +161,91 @@ function renderItems() {
 
 function addItem() {
   if (!isPro && items.length >= 5) {
-    showToast('Free version limit: 5 items');
+    toast('Free version limit: 5 items');
     return;
   }
 
-  const name = itemName.value;
-  const qty = Number(itemQty.value);
-  const price = Number(itemPrice.value);
-
-  if (!name || !qty || !price) {
-    showToast('Fill all item fields');
+  if (!itemName.value || !itemQty.value || !itemPrice.value) {
+    toast('Fill all item fields');
     return;
   }
 
-  items.push({ name, qty, price });
+  items.push({
+    name: itemName.value,
+    qty: Number(itemQty.value),
+    price: Number(itemPrice.value)
+  });
+
   itemName.value = '';
   itemQty.value = '';
   itemPrice.value = '';
 
-  saveState();
-  renderItems();
-  showToast('Item added');
+  save();
+  render();
+  toast('Item added');
 }
 
-function generateInvoice() {
+function generatePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  doc.setFontSize(18);
+  // Header
+  doc.setFillColor(91, 92, 255);
+  doc.rect(0, 0, 210, 30, 'F');
+  doc.setTextColor(255);
+  doc.setFontSize(20);
   doc.text('INVOICE', 20, 20);
 
+  doc.setTextColor(0);
   doc.setFontSize(12);
-  doc.text(`Client: ${client.value}`, 20, 35);
-  doc.text(`Description: ${description.value}`, 20, 45);
+  doc.text(`Client: ${client.value}`, 20, 45);
+  doc.text(`Description: ${description.value}`, 20, 55);
 
-  let y = 60;
+  // Table header
+  let y = 70;
+  doc.setFillColor(240);
+  doc.rect(20, y, 170, 10, 'F');
+  doc.text('Item', 22, y + 7);
+  doc.text('Qty', 110, y + 7);
+  doc.text('Price', 130, y + 7);
+  doc.text('Total', 160, y + 7);
+
+  y += 15;
   let total = 0;
 
   items.forEach(i => {
-    doc.text(`${i.name} - ${i.qty} x $${i.price}`, 20, y);
-    total += i.qty * i.price;
+    const rowTotal = i.qty * i.price;
+    total += rowTotal;
+    doc.text(i.name, 22, y);
+    doc.text(String(i.qty), 110, y);
+    doc.text(`$${i.price}`, 130, y);
+    doc.text(`$${rowTotal}`, 160, y);
     y += 10;
   });
 
-  doc.text(`Total: $${total}`, 20, y + 10);
+  doc.setFontSize(14);
+  doc.text(`Total: $${total}`, 140, y + 10);
 
   if (!isPro) {
     doc.setTextColor(200);
     doc.setFontSize(40);
     doc.text('FREE VERSION', 30, 200, { angle: 45 });
-    doc.setTextColor(0);
   }
 
   doc.save('invoice.pdf');
-  showToast('Invoice downloaded');
+  toast('Invoice downloaded');
 }
 
 function activatePro() {
-  showToast('Redirecting to payment…');
+  toast('Redirecting to payment…');
 }
 
 addItemBtn.onclick = addItem;
-generateBtn.onclick = generateInvoice;
+generateBtn.onclick = generatePDF;
 proBtn.onclick = activatePro;
-window.onload = loadState;
+
+items = JSON.parse(localStorage.getItem('items') || '[]');
+render();
 </script>
 
 </body>
