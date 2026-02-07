@@ -16,12 +16,12 @@
     }
 
     .box {
-      max-width: 500px;
-      background: #fff;
+      max-width: 520px;
+      background: #ffffff;
       margin: auto;
       padding: 25px;
       border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.1);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
 
     h1 {
@@ -36,6 +36,10 @@
       font-size: 16px;
     }
 
+    textarea {
+      resize: vertical;
+    }
+
     button {
       border: none;
       background: #000;
@@ -48,7 +52,7 @@
     }
 
     .reset {
-      background: #999;
+      background: #888;
     }
   </style>
 </head>
@@ -74,64 +78,66 @@
 
     function resetPro() {
       localStorage.removeItem('pro');
-      alert('Back to Free version');
+      alert('Free version activated');
     }
 
-    <script>
-function generateInvoice() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+    function generateInvoice() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
 
-  const client = document.getElementById('client').value || 'Client name';
-  const desc = document.getElementById('desc').value || 'Service description';
-  const total = document.getElementById('total').value || '0';
+      const client =
+        document.getElementById('client').value || 'Client name';
+      const desc =
+        document.getElementById('desc').value || 'Service description';
+      const total =
+        document.getElementById('total').value || '0';
 
-  // Header
-  doc.setFontSize(22);
-  doc.text('INVOICE', 20, 25);
+      // Header
+      doc.setFontSize(22);
+      doc.text('INVOICE', 20, 25);
 
-  doc.setFontSize(11);
-  doc.text('Invoice #001', 150, 25);
-  doc.text('Date: ' + new Date().toLocaleDateString(), 150, 32);
+      doc.setFontSize(11);
+      doc.text('Invoice #001', 150, 25);
+      doc.text('Date: ' + new Date().toLocaleDateString(), 150, 32);
 
-  // Line
-  doc.setLineWidth(0.5);
-  doc.line(20, 35, 190, 35);
+      // Divider
+      doc.setLineWidth(0.5);
+      doc.line(20, 35, 190, 35);
 
-  // Bill to
-  doc.setFontSize(12);
-  doc.text('Bill To', 20, 50);
-  doc.setFontSize(11);
-  doc.text(client, 20, 58);
+      // Bill To
+      doc.setFontSize(12);
+      doc.text('Bill To', 20, 50);
+      doc.setFontSize(11);
+      doc.text(client, 20, 58);
 
-  // Description box
-  doc.setDrawColor(200);
-  doc.rect(20, 70, 170, 40);
+      // Description
+      doc.setDrawColor(200);
+      doc.rect(20, 70, 170, 40);
+      doc.text('Description', 22, 78);
+      doc.text(desc, 22, 88);
 
-  doc.text('Description', 22, 78);
-  doc.text(desc, 22, 88);
+      // Total
+      doc.setDrawColor(0);
+      doc.rect(120, 120, 70, 20);
+      doc.setFontSize(12);
+      doc.text('Total', 125, 132);
+      doc.setFontSize(16);
+      doc.text('$' + total, 160, 132);
 
-  // Total box
-  doc.setDrawColor(0);
-  doc.rect(120, 120, 70, 20);
+      // Footer
+      doc.setFontSize(10);
+      doc.text('Thank you for your business!', 20, 180);
 
-  doc.setFontSize(12);
-  doc.text('Total', 125, 132);
-  doc.setFontSize(16);
-  doc.text('$' + total, 160, 132);
+      // Watermark
+      if (localStorage.getItem('pro') !== 'true') {
+        doc.setTextColor(220);
+        doc.setFontSize(45);
+        doc.text('FREE VERSION', 30, 200, { angle: 45 });
+        doc.setTextColor(0);
+      }
 
-  // Footer
-  doc.setFontSize(10);
-  doc.text('Thank you for your business!', 20, 180);
-
-  // Watermark
-  if (localStorage.getItem('pro') !== 'true') {
-    doc.setTextColor(220);
-    doc.setFontSize(45);
-    doc.text('FREE VERSION', 30, 200, { angle: 45 });
-    doc.setTextColor(0);
-  }
-
-  doc.save('invoice.pdf');
-}
-</script>
+      doc.save('invoice.pdf');
+    }
+  </script>
+</body>
+</html>
