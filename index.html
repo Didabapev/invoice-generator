@@ -224,7 +224,10 @@ function removeItem(index) {
 
 function activatePro() {
   isPro = true;
+  localStorage.setItem('pro', 'true');
   alert('Pro activated');
+}
+
 }
 
 function generateInvoice() {
