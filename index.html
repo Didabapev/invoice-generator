@@ -118,6 +118,19 @@
     p strong {
       font-size: 20px;
     }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .left, .right {
+      background: #f9fafb;
+      padding: 20px;
+      border-radius: 12px;
+    }
 </style>
 </head>
 <body>
@@ -131,11 +144,29 @@
 
 <h1>Invoice Generator</h1>
 
-<label>Client Name</label>
-<input id="client" placeholder="Client name" />
+<div class="grid">
+  <div class="left">
+    <label>Client Name</label>
+    <input id="client" placeholder="Client name" />
 
-<label>Description</label>
-<input id="description" placeholder="Service description" />
+    <label>Description</label>
+    <input id="description" placeholder="Service description" />
+
+    <hr />
+
+    <h3>Add Item</h3>
+    <input id="item" placeholder="Item name" />
+    <input id="qty" type="number" placeholder="Quantity" />
+    <input id="price" type="number" placeholder="Price" />
+    <button onclick="addItem()">Add item</button>
+  </div>
+
+  <div class="right">
+    <h3>Items</h3>
+    <ul id="itemsList"></ul>
+    <p><strong>Total:</strong> $<span id="totalAmount">0</span></p>
+  </div>
+</div>
 
 <hr />
 
