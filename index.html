@@ -103,7 +103,7 @@
       const qty = Number(document.getElementById('qty').value);
       const price = Number(document.getElementById('price').value);
 
-      if (!item || !qty || !price) {
+    if (!item || isNaN(qty) || isNaN(price)) {
         alert('Fill all item fields');
         return;
       }
