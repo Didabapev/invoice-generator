@@ -309,7 +309,8 @@ function generateInvoice() {
 
   doc.save('invoice.pdf');
 }
-</script>function saveState() {
+</script>
+  function saveState() {
   localStorage.setItem('invoice_items', JSON.stringify(items));
   localStorage.setItem('invoice_client', document.getElementById('client').value);
   localStorage.setItem('invoice_description', document.getElementById('description').value);
