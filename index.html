@@ -16,7 +16,7 @@
     }
 
     .box {
-      max-width: 560px;
+      max-width: 620px;
       background: #ffffff;
       margin: auto;
       padding: 25px;
@@ -29,11 +29,9 @@
       margin-bottom: 20px;
     }
 
-    input, textarea, button {
-      width: 100%;
+    input, button {
       padding: 10px;
-      margin-top: 10px;
-      font-size: 15px;
+      font-size: 14px;
     }
 
     .row {
@@ -54,6 +52,10 @@
       margin-top: 15px;
     }
 
+    .add {
+      background: #444;
+    }
+
     .pro {
       background: #0a7cff;
     }
@@ -71,10 +73,12 @@
     <input id="client" placeholder="Client name">
 
     <div class="row">
-      <input id="item" placeholder="Item name">
+      <input id="item" placeholder="Item">
       <input id="qty" placeholder="Qty">
       <input id="price" placeholder="Price">
     </div>
+
+    <button class="add" onclick="addItem()">Add item</button>
 
     <button onclick="generateInvoice()">Generate Invoice (PDF)</button>
     <button class="pro" onclick="activatePro()">Upgrade to Pro</button>
@@ -82,6 +86,8 @@
   </div>
 
   <script>
+    let items = [];
+
     function activatePro() {
       localStorage.setItem('pro', 'true');
       alert('Pro activated');
@@ -92,20 +98,31 @@
       alert('Free version activated');
     }
 
+    function addItem() {
+      const item = document.getElementById('item').value;
+      const qty = Number(document.getElementById('qty').value);
+      const price = Number(document.getElementById('price').value);
+
+      if (!item || !qty || !price) {
+        alert('Fill all item fields');
+        return;
+      }
+
+      items.push({ item, qty, price });
+
+      document.getElementById('item').value = '';
+      document.getElementById('qty').value = '';
+      document.getElementById('price').value = '';
+
+      alert('Item added');
+    }
+
     function generateInvoice() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
       const client =
         document.getElementById('client').value || 'Client name';
-      const item =
-        document.getElementById('item').value || 'Service';
-      const qty =
-        Number(document.getElementById('qty').value) || 1;
-      const price =
-        Number(document.getElementById('price').value) || 0;
-
-      const total = qty * price;
 
       // Header
       doc.setFontSize(22);
@@ -124,24 +141,34 @@
       doc.text(client, 20, 58);
 
       // Table header
+      let y = 80;
       doc.setFontSize(12);
-      doc.text('Item', 20, 80);
-      doc.text('Qty', 110, 80);
-      doc.text('Price', 135, 80);
-      doc.text('Total', 165, 80);
+      doc.text('Item', 20, y);
+      doc.text('Qty', 110, y);
+      doc.text('Price', 135, y);
+      doc.text('Total', 165, y);
+      doc.line(20, y + 3, 190, y + 3);
 
-      doc.line(20, 83, 190, 83);
-
-      // Table row
+      // Items
+      let grandTotal = 0;
       doc.setFontSize(11);
-      doc.text(item, 20, 95);
-      doc.text(String(qty), 110, 95);
-      doc.text('$' + price.toFixed(2), 135, 95);
-      doc.text('$' + total.toFixed(2), 165, 95);
+
+      items.forEach((row, index) => {
+        const rowTotal = row.qty * row.price;
+        grandTotal += rowTotal;
+
+        const rowY = y + 15 + index * 10;
+
+        doc.text(row.item, 20, rowY);
+        doc.text(String(row.qty), 110, rowY);
+        doc.text('$' + row.price.toFixed(2), 135, rowY);
+        doc.text('$' + rowTotal.toFixed(2), 165, rowY);
+      });
 
       // Grand total
+      const totalY = y + 25 + items.length * 10;
       doc.setFontSize(14);
-      doc.text('Grand Total: $' + total.toFixed(2), 20, 130);
+      doc.text('Grand Total: $' + grandTotal.toFixed(2), 20, totalY);
 
       // Watermark
       if (localStorage.getItem('pro') !== 'true') {
