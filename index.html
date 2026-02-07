@@ -303,7 +303,32 @@ function generateInvoice() {
 
   doc.save('invoice.pdf');
 }
-</script>
+</script>function saveState() {
+  localStorage.setItem('invoice_items', JSON.stringify(items));
+  localStorage.setItem('invoice_client', document.getElementById('client').value);
+  localStorage.setItem('invoice_description', document.getElementById('description').value);
+}
+
+function loadState() {
+  const savedItems = localStorage.getItem('invoice_items');
+  if (savedItems) {
+    items = JSON.parse(savedItems);
+    renderItems();
+  }
+
+  const client = localStorage.getItem('invoice_client');
+  if (client) document.getElementById('client').value = client;
+
+  const description = localStorage.getItem('invoice_description');
+  if (description) document.getElementById('description').value = description;
+
+  if (localStorage.getItem('pro') === 'true') {
+    isPro = true;
+  }
+}
+
+window.onload = loadState;
+
 
 </main>
 </body>
