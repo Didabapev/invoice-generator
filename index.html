@@ -30,9 +30,9 @@ input, textarea {
 }
 
 button {
-  padding: 10px 18px;
+  padding: 8px 14px;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #5b5cff;
   color: #fff;
   cursor: pointer;
@@ -40,6 +40,10 @@ button {
 
 button.secondary {
   background: #888;
+}
+
+button.delete {
+  background: #ff5b5b;
 }
 
 table {
@@ -51,6 +55,7 @@ table {
 th, td {
   padding: 10px;
   border-bottom: 1px solid #eee;
+  text-align: left;
 }
 
 .total {
@@ -106,6 +111,7 @@ th, td {
 <th>Qty</th>
 <th>Price</th>
 <th>Total</th>
+<th></th>
 </tr>
 </thead>
 <tbody id="itemsTable"></tbody>
@@ -139,21 +145,22 @@ function save() {
 }
 
 function render() {
-  const tbody = itemsTable;
-  tbody.innerHTML = '';
+  itemsTable.innerHTML = '';
   let total = 0;
 
-  items.forEach(i => {
-    const tr = document.createElement('tr');
+  items.forEach((i, index) => {
     const rowTotal = i.qty * i.price;
     total += rowTotal;
+
+    const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${i.name}</td>
       <td>${i.qty}</td>
       <td>$${i.price}</td>
       <td>$${rowTotal}</td>
+      <td><button class="delete" onclick="removeItem(${index})">Delete</button></td>
     `;
-    tbody.appendChild(tr);
+    itemsTable.appendChild(tr);
   });
 
   document.getElementById('total').textContent = total;
@@ -185,11 +192,17 @@ function addItem() {
   toast('Item added');
 }
 
+function removeItem(index) {
+  items.splice(index, 1);
+  save();
+  render();
+  toast('Item removed');
+}
+
 function generatePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  // Header
   doc.setFillColor(91, 92, 255);
   doc.rect(0, 0, 210, 30, 'F');
   doc.setTextColor(255);
@@ -201,30 +214,18 @@ function generatePDF() {
   doc.text(`Client: ${client.value}`, 20, 45);
   doc.text(`Description: ${description.value}`, 20, 55);
 
-  // Table header
-  let y = 70;
-  doc.setFillColor(240);
-  doc.rect(20, y, 170, 10, 'F');
-  doc.text('Item', 22, y + 7);
-  doc.text('Qty', 110, y + 7);
-  doc.text('Price', 130, y + 7);
-  doc.text('Total', 160, y + 7);
-
-  y += 15;
+  let y = 75;
   let total = 0;
 
   items.forEach(i => {
     const rowTotal = i.qty * i.price;
     total += rowTotal;
-    doc.text(i.name, 22, y);
-    doc.text(String(i.qty), 110, y);
-    doc.text(`$${i.price}`, 130, y);
-    doc.text(`$${rowTotal}`, 160, y);
+    doc.text(`${i.name} — ${i.qty} x $${i.price} = $${rowTotal}`, 20, y);
     y += 10;
   });
 
   doc.setFontSize(14);
-  doc.text(`Total: $${total}`, 140, y + 10);
+  doc.text(`Total: $${total}`, 20, y + 10);
 
   if (!isPro) {
     doc.setTextColor(200);
