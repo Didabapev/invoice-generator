@@ -16,7 +16,7 @@
     }
 
     .box {
-      max-width: 520px;
+      max-width: 560px;
       background: #ffffff;
       margin: auto;
       padding: 25px;
@@ -33,11 +33,17 @@
       width: 100%;
       padding: 10px;
       margin-top: 10px;
-      font-size: 16px;
+      font-size: 15px;
     }
 
-    textarea {
-      resize: vertical;
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .row input {
+      flex: 1;
     }
 
     button {
@@ -45,6 +51,7 @@
       background: #000;
       color: #fff;
       cursor: pointer;
+      margin-top: 15px;
     }
 
     .pro {
@@ -62,8 +69,12 @@
     <h1>Invoice Generator</h1>
 
     <input id="client" placeholder="Client name">
-    <textarea id="desc" placeholder="Service description"></textarea>
-    <input id="total" placeholder="Total amount ($)">
+
+    <div class="row">
+      <input id="item" placeholder="Item name">
+      <input id="qty" placeholder="Qty">
+      <input id="price" placeholder="Price">
+    </div>
 
     <button onclick="generateInvoice()">Generate Invoice (PDF)</button>
     <button class="pro" onclick="activatePro()">Upgrade to Pro</button>
@@ -87,10 +98,14 @@
 
       const client =
         document.getElementById('client').value || 'Client name';
-      const desc =
-        document.getElementById('desc').value || 'Service description';
-      const total =
-        document.getElementById('total').value || '0';
+      const item =
+        document.getElementById('item').value || 'Service';
+      const qty =
+        Number(document.getElementById('qty').value) || 1;
+      const price =
+        Number(document.getElementById('price').value) || 0;
+
+      const total = qty * price;
 
       // Header
       doc.setFontSize(22);
@@ -100,33 +115,33 @@
       doc.text('Invoice #001', 150, 25);
       doc.text('Date: ' + new Date().toLocaleDateString(), 150, 32);
 
-      // Divider
-      doc.setLineWidth(0.5);
       doc.line(20, 35, 190, 35);
 
-      // Bill To
+      // Client
       doc.setFontSize(12);
       doc.text('Bill To', 20, 50);
       doc.setFontSize(11);
       doc.text(client, 20, 58);
 
-      // Description
-      doc.setDrawColor(200);
-      doc.rect(20, 70, 170, 40);
-      doc.text('Description', 22, 78);
-      doc.text(desc, 22, 88);
-
-      // Total
-      doc.setDrawColor(0);
-      doc.rect(120, 120, 70, 20);
+      // Table header
       doc.setFontSize(12);
-      doc.text('Total', 125, 132);
-      doc.setFontSize(16);
-      doc.text('$' + total, 160, 132);
+      doc.text('Item', 20, 80);
+      doc.text('Qty', 110, 80);
+      doc.text('Price', 135, 80);
+      doc.text('Total', 165, 80);
 
-      // Footer
-      doc.setFontSize(10);
-      doc.text('Thank you for your business!', 20, 180);
+      doc.line(20, 83, 190, 83);
+
+      // Table row
+      doc.setFontSize(11);
+      doc.text(item, 20, 95);
+      doc.text(String(qty), 110, 95);
+      doc.text('$' + price.toFixed(2), 135, 95);
+      doc.text('$' + total.toFixed(2), 165, 95);
+
+      // Grand total
+      doc.setFontSize(14);
+      doc.text('Grand Total: $' + total.toFixed(2), 20, 130);
 
       // Watermark
       if (localStorage.getItem('pro') !== 'true') {
