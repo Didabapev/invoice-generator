@@ -3,26 +3,32 @@
 
   <url>
     <loc>https://didabapev.github.io/invoice-generator/</loc>
+    <priority>1.0</priority>
   </url>
 
   <url>
     <loc>https://didabapev.github.io/invoice-generator/about.html</loc>
+    <priority>0.6</priority>
   </url>
 
   <url>
     <loc>https://didabapev.github.io/invoice-generator/contact.html</loc>
+    <priority>0.6</priority>
   </url>
 
   <url>
     <loc>https://didabapev.github.io/invoice-generator/privacy.html</loc>
+    <priority>0.5</priority>
   </url>
 
   <url>
     <loc>https://didabapev.github.io/invoice-generator/invoice-template.html</loc>
+    <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://didabapev.github.io/invoice-generator/online-invoice-pdf.html</loc>
+    <priority>0.8</priority>
   </url>
 
 </urlset>
