@@ -251,7 +251,7 @@ function generatePDF() {
   if (!isPro) {
     doc.setTextColor(200);
     doc.setFontSize(40);
-    doc.text('FREE VERSION', 30, 200, { angle: 45 });
+    doc.text(30, 200, { angle: 45 });
   }
 
   doc.save('invoice.pdf');
